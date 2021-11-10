@@ -21,6 +21,7 @@ class Plugin(StellarPlayer.IStellarPlayerPlugin):
                 {'type':'edit',    'name':'url','label':'html页面地址'},
                 {'type':'button','name':'解析','@click':'search'}
             ] # 行为列表，包含两个控件对象，两个控件宽度各占行的一半空间
+            ,'height':30
          ]
         return controls
     def search(self):
