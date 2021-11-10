@@ -32,9 +32,10 @@ class IwebdecodePlugin(StellarPlayer.IStellarPlayerPlugin):
         #获取到输入框的地址
         search_url = self.player.getControlValue('main', 'url_edit')
         接口就写在这里
-        urls = []
-        for i in range(1):
-            urls.append({'url': search_url, 'video_profile': '视频名称'})
+        urls = []        
+        urls.append({'url': search_url, 'video_profile': '视频名称'})
+        urls.append({'url': search_url, 'video_profile': '视频名称'})
+        
         self.player.updateControlValue('main', 'list', urls)
         self.playurl = urls
         self.player.toast('main', '解析完成')
