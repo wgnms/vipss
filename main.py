@@ -3,13 +3,9 @@ import StellarPlayer
 class Plugin(StellarPlayer.IStellarPlayerPlugin): 
     def __init__(self, player:StellarPlayer.IStellarPlayer): 
         super().__init__(player) 
-    
-    def handleRequest(self, method, args): 
-        if hasattr(self.simple, f"on_{method}"): 
-            getattr(self.simple, f"on_{method}")(args) 
             
     def start(self): 
-        return super().stop() 
+        return super().start() 
         print("插件启动") 
         
     def stop(self): 
