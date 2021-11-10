@@ -16,12 +16,9 @@ class Plugin(StellarPlayer.IStellarPlayerPlugin):
         print("插件初始化") 
         return Plugin(player) 
     def makeLayout(self):
+        nav_labels=[{'type':'edit','name':'search_url','label':'html页面地址:'},{'type':'button','name':'解析'}]
         controls = [ 
-            [         
-                {'type':'edit',    'name':'url','label':'html页面地址'},
-                {'type':'button','name':'解析','@click':'search'}
-            ] # 行为列表，包含两个控件对象，两个控件宽度各占行的一半空间
-            ,'height':30
+            {'group':nav_labels,'height':30}
          ]
         return controls
     def search(self):
