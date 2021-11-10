@@ -30,11 +30,11 @@ class IwebdecodePlugin(StellarPlayer.IStellarPlayerPlugin):
             self.player.loadingAnimation('main')
         # ----------------------------------------------
         #获取到输入框的地址
-        search_url = self.player.getControlValue('main', 'url_edit')
+        #search_url = self.player.getControlValue('main', 'url_edit')
         接口就写在这里
         urls = []        
-        urls.append({'url': str(search_url), 'video_profile': '视频名称1'})
-        urls.append({'url': str(search_url), 'video_profile': '视频名称2'})
+        urls.append({'url': 'https://hls.videocc.net/source/24560c93d4/d/24560c93d4c855d66ab155af0db215d1_1.m3u8', 'video_profile': '视频名称1'})
+        urls.append({'url': '123', 'video_profile': '视频名称2'})
         
         self.player.updateControlValue('main', 'list', urls)
         self.playurl = urls
