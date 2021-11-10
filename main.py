@@ -9,6 +9,7 @@ class Plugin(StellarPlayer.IStellarPlayerPlugin):
             getattr(self.simple, f"on_{method}")(args) 
             
     def start(self): 
+        super().stop() 
         print("插件启动") 
         
     def stop(self): 
