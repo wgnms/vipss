@@ -19,3 +19,11 @@ class Plugin(StellarPlayer.IStellarPlayerPlugin):
     def newPlugin(player:StellarPlayer.IStellarPlayer,*arg): 
         print("插件初始化") 
         return Plugin(player) 
+    
+def newPlugin(player:StellarPlayer.IStellarPlayer,*arg):
+    plugin = Plugin(player)
+    return plugin
+
+def destroyPlugin(plugin:StellarPlayer.IStellarPlayerPlugin):
+    plugin.stop()
+
