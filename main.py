@@ -25,6 +25,9 @@ class Plugin(StellarPlayer.IStellarPlayerPlugin):
         return controls
     def search(self):
         return 
+    def show(self):
+        controls=self.makeLayout()
+        self.doModal('main',800,600,'',controls)
 def newPlugin(player:StellarPlayer.IStellarPlayer,*arg):
     plugin = Plugin(player)
     return plugin
