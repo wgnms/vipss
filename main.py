@@ -8,9 +8,8 @@ import urllib.parse
 
 home_66ys_url = 'http://www.66ys.co/'
 
-
 def concatUrl(url1, url2):
-    splits = re.split(r'/+', url1)
+    splits = re.split(r'/+',url1)
     url = splits[0] + '//'
     if url2.startswith('/'):
         url = url + splits[1] + url2
@@ -18,14 +17,13 @@ def concatUrl(url1, url2):
         url = url + '/'.join(splits[1:-1]) + '/' + url2
     return url
 
-
-# 爬取影视页面中的播放链接地址
+#爬取影视页面中的播放链接地址
 def parse_66ys_movie_magnet(url):
     print(url)
     urls = []
-    res = requests.get(url, verify=False)
+    res = requests.get(url,verify=False)
     if res.status_code == 200:
-        bs = bs4.BeautifulSoup(res.content.decode('gb2312', 'ignore'), 'html.parser')
+        bs = bs4.BeautifulSoup(res.content.decode('gb2312','ignore'),'html.parser')
         selector = bs.select('#text table tbody')
         for item in selector:
             for child in item.children:
@@ -33,20 +31,19 @@ def parse_66ys_movie_magnet(url):
                     for a in child.select('tr > td > a'):
                         url = a.get('href')
                         if url.startswith('magnet'):
-                            urls.append({'url': url, 'title': a.string})
+                            urls.append({'url':url,'title':a.string})
     else:
         print(res.text)
     return urls
 
-
-# 爬取所有分类
+#爬取所有分类
 def parse_66ys_category():
     urls = []
     search_urls = []
     blacks = []
-    res = requests.get(home_66ys_url, verify=False)
+    res = requests.get(home_66ys_url,verify=False)
     if res.status_code == 200:
-        bs = bs4.BeautifulSoup(res.content.decode('gb2312', 'ignore'), 'html.parser')
+        bs = bs4.BeautifulSoup(res.content.decode('gb2312','ignore'), 'html.parser')
         selector = bs.select('body > div:nth-child(2) > div.menutv > ul')
         for item in selector:
             for child in item.children:
@@ -54,19 +51,18 @@ def parse_66ys_category():
                     child = child.find('a')
                     url = child.get('href')
                     if url:
-                        if not re.match(r'http', url):
+                        if not re.match(r'http',url):
                             url = concatUrl(home_66ys_url, url)
                         if not child.string in blacks:
-                            urls.append({'title': child.string, 'url': url})
-        # 获取搜索页面链接
+                            urls.append({'title':child.string,'url':url})
+        #获取搜索页面链接
         selector = bs.select('#searchform')
         for item in selector:
             search_urls.append(concatUrl(urls[0]['url'], item.get('action')))
     return urls, search_urls
 
-
 class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
-    def __init__(self, player: StellarPlayer.IStellarPlayer):
+    def __init__(self,player:StellarPlayer.IStellarPlayer):
         super().__init__(player)
         self.categories = []
         self.search_urls = []
@@ -82,12 +78,12 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
         self.movie_urls = {}
         self.gbthread = threading.Thread(target=self._bgThread)
 
-    # 爬取某个分类页面的所有影视页面链接
+    #爬取某个分类页面的所有影视页面链接
     def parse_66ys_page_movies(self, page_url):
         urls = []
-        res = requests.get(page_url, verify=False)
+        res = requests.get(page_url,verify=False)
         if res.status_code == 200:
-            bs = bs4.BeautifulSoup(res.content.decode('gb2312', 'ignore'), 'html.parser')
+            bs = bs4.BeautifulSoup(res.content.decode('gb2312','ignore'),'html.parser')
             if self.curCategoryName != '首页':
                 selector = bs.select('body > div:nth-child(4) > div.mainleft > div > div > ul')
                 for ul in selector:
@@ -96,7 +92,7 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
                             url = item.select('div.listimg > a')[0].get('href')
                             img = item.select('div.listimg > a > img')[0].get('src')
                             title = item.select('div.listimg > a > img')[0].get('alt')
-                            urls.append({'title': title, 'url': url, 'img': img})
+                            urls.append({'title':title,'url':url,'img':img})
             else:
                 selector = bs.select('body > div:nth-child(4) > div.tjlist > ul')
                 for ul in selector:
@@ -108,17 +104,16 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
                                 url = link.get('href')
                                 imgurl = img[0].get('src')
                                 title = img[0].get('title')
-                                urls.append({'title': title, 'url': url, 'img': imgurl})
+                                urls.append({'title':title,'url':url,'img':imgurl})
         else:
             print(res.text)
         return urls
 
     def search_66ys_page_movies(self, search_url):
         urls = []
-        res = requests.post(search_url, data={'show': 'title,smalltext', 'tempid': 1, 'tbname': 'Article',
-                                              'keyboard': self.search_word.encode('gb2312')}, verify=False)
+        res = requests.post(search_url,data={'show':'title,smalltext','tempid':1,'tbname':'Article','keyboard':self.search_word.encode('gb2312')},verify=False)
         if res.status_code == 200:
-            bs = bs4.BeautifulSoup(res.content.decode('gb2312', 'ignore'), 'html.parser')
+            bs = bs4.BeautifulSoup(res.content.decode('gb2312','ignore'),'html.parser')
             selector = bs.select('body > div:nth-child(3) > div > div.mainleft ul')
             for ul in selector:
                 for item in ul.children:
@@ -126,20 +121,20 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
                         url = item.select('div.listimg > a')[0].get('href')
                         img = item.select('div.listimg > a > img')[0].get('src')
                         title = item.select('div.listimg > a > img')[0].get('alt')
-                        urls.append({'title': title, 'url': url, 'img': img})
+                        urls.append({'title':title,'url':url,'img':img})
         else:
             print(res.text)
         return urls
 
-    # 爬取分类对应的所有页面数
-    def parse_66ys_page_num(self, catUrl):
+    #爬取分类对应的所有页面数
+    def parse_66ys_page_num(self,catUrl):
         if self.curCategoryName == '首页':
             return ['']
         print(catUrl)
         pages = []
-        res = requests.get(catUrl, verify=False)
+        res = requests.get(catUrl,verify=False)
         if res.status_code == 200:
-            bs = bs4.BeautifulSoup(res.content.decode('gb2312', 'ignore'), 'html.parser')
+            bs = bs4.BeautifulSoup(res.content.decode('gb2312','ignore'),'html.parser')
             selector = bs.select('body > div:nth-child(4) > div.mainleft > div > div > div:nth-child(1)')
             for item in selector:
                 for child in item.children:
@@ -153,11 +148,11 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
         if len(pages) > 0:
             last = pages[-1]
             pages.clear()
-            m = re.match(catUrl + "index_(\d+).(\w+)", last)
+            m = re.match(catUrl+"index_(\d+).(\w+)", last)
             if m:
                 num = int(m.group(1))
                 pages.append(f'index.{m.group(2)}')
-                pages += [f'index_{i}.{m.group(2)}' for i in range(2, num + 1)]
+                pages += [f'index_{i}.{m.group(2)}' for i in range(2,num + 1)]
         return pages
 
     def _bgThread(self):
@@ -165,18 +160,16 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
             self.parsePage()
             time.sleep(0.001)
         print(f'66ys bg thread:{self.gbthread.native_id} exit')
-
         # 刷新界面
         def update():
             if self.player.isModalExist('main'):
-                self.updateLayout('main', self.makeLayout())
+                self.updateLayout('main',self.makeLayout())
                 self.loading(True)
-
-        if hasattr(self.player, 'queueTask'):
+        if hasattr(self.player,'queueTask'):
             self.player.queueTask(update)
         else:
             update()
-
+       
     def stop(self):
         if self.gbthread.is_alive():
             print(f'66ys bg thread:{self.gbthread.native_id} is still running')
@@ -187,73 +180,72 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
         return super().start()
 
     def parsePage(self):
-        # 获取分类导航
+        #获取分类导航
         if len(self.categories) == 0:
             self.categories, self.search_urls = parse_66ys_category()
         if len(self.categories) > 0:
             if not self.curCategory:
-                self.curCategory, self.curCategoryName = self.categories[0]['url'], self.categories[0]['title']
-            # 获取该分类的所有页面数
+                self.curCategory, self.curCategoryName = self.categories[0]['url'],self.categories[0]['title']
+            #获取该分类的所有页面数
             if len(self.pages) == 0:
                 self.pages = self.parse_66ys_page_num(self.curCategory)
                 self.num_page = '共' + str(len(self.pages)) + '页'
                 if len(self.pages) > 0:
-                    # 获取分页视频资源
+                    #获取分页视频资源
                     if len(self.movies) == 0:
                         url = concatUrl(self.curCategory, self.pages[self.pageIndex])
-                        self.movies = self.parse_66ys_page_movies(url)
+                        self.movies = self.parse_66ys_page_movies(url)  
 
     def makeLayout(self):
         nav_labels = []
         for cat in self.categories:
-            nav_labels.append({'type': 'link', 'name': cat['title'], '@click': 'onCategoryClick'})
+            nav_labels.append({'type':'link','name':cat['title'],'@click':'onCategoryClick'})
 
         grid_layout = {'group':
-            [
-                {'type': 'image', 'name': 'img', 'width': 120, 'height': 150, '@click': 'onMovieImageClick'},
-                {'type': 'label', 'name': 'title', 'hAlign': 'center'},
-            ],
-            'dir': 'vertical'
-        }
+                            [
+                                {'type':'image','name':'img','width':120,'height':150,'@click':'onMovieImageClick'},
+                                {'type':'label','name':'title','hAlign':'center'},
+                            ],
+                            'dir':'vertical'
+                      }
         controls = [
-            {'group': nav_labels, 'height': 30},
-            {'type': 'space', 'height': 10},
+            {'group':nav_labels,'height':30},
+            {'type':'space','height':10},
             {'group':
                 [
-                    {'type': 'edit', 'name': 'search_edit', 'label': '搜索'},
-                    {'type': 'button', 'name': '搜电影', '@click': 'onSearch'}
+                    {'type':'edit','name':'search_edit','label':'搜索'},
+                    {'type':'button','name':'搜电影','@click':'onSearch'}
                 ]
-                , 'height': 30
+                ,'height':30
             },
-            {'type': 'space', 'height': 10},
-            {'type': 'grid', 'name': 'list', 'itemlayout': grid_layout, 'value': self.movies, 'marginSize': 5,
-             'itemheight': 180, 'itemwidth': 120},
+            {'type':'space','height':10},
+            {'type':'grid','name':'list','itemlayout':grid_layout,'value':self.movies,'marginSize':5,'itemheight':180,'itemwidth':120},
             {'group':
                 [
-                    {'type': 'space'},
+                    {'type':'space'},
                     {'group':
                         [
-                            {'type': 'label', 'name': 'cur_page', ':value': 'cur_page'},
-                            {'type': 'link', 'name': '上一页', '@click': 'onClickFormerPage'},
-                            {'type': 'link', 'name': '下一页', '@click': 'onClickNextPage'},
-                            {'type': 'link', 'name': '首页', '@click': 'onClickFirstPage'},
-                            {'type': 'link', 'name': '末页', '@click': 'onClickLastPage'},
-                            {'type': 'label', 'name': 'num_page', ':value': 'num_page'},
+                            {'type':'label','name':'cur_page',':value':'cur_page'},
+                            {'type':'link','name':'上一页','@click':'onClickFormerPage'},
+                            {'type':'link','name':'下一页','@click':'onClickNextPage'},
+                            {'type':'link','name':'首页','@click':'onClickFirstPage'},
+                            {'type':'link','name':'末页','@click':'onClickLastPage'},
+                            {'type':'label','name':'num_page',':value':'num_page'},
                         ]
-                        , 'width': 0.45
-                        , 'hAlign': 'center'
+                        ,'width':0.45
+                        ,'hAlign':'center'
                     },
-                    {'type': 'space'}
+                    {'type':'space'}
                 ]
-                , 'height': 30
+                ,'height':30
             },
-            {'type': 'space', 'height': 5}
+            {'type':'space','height':5}
         ]
         return controls
-
+        
     def show(self):
         controls = self.makeLayout()
-        self.doModal('main', 800, 600, '', controls)
+        self.doModal('main',800,600,'',controls)
 
     def onModalCreated(self, pageId):
         print(f'dytt onModalCreated {pageId=}')
@@ -261,47 +253,47 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
             if len(self.movies) == 0:
                 self.loading()
 
-    def onSearchInput(self, *args):
+    def onSearchInput(self,*args):
         print(f'{self.search_word}')
 
-    def onSearch(self, *args):
-        self.search_word = self.player.getControlValue('main', 'search_edit')
+    def onSearch(self,*args):
+        self.search_word = self.player.getControlValue('main','search_edit')
         if len(self.search_urls) > 0:
             url = self.search_urls[0]
             self.search_movies = self.search_66ys_page_movies(url)
             print(self.search_movies)
             if len(self.search_movies) > 0:
                 grid_layout = {'group':
-                    [
-                        {'type': 'image', 'name': 'img', 'width': 120, 'height': 150, '@click': 'onMovieImageClick'},
-                        {'type': 'label', 'name': 'title', 'hAlign': 'center'},
-                    ],
-                    'dir': 'vertical'
-                }
-                controls = {'type': 'grid', 'name': 'list', 'itemlayout': grid_layout, 'value': self.search_movies,
-                            'marginSize': 5, 'itemheight': 180, 'itemwidth': 120}
+                            [
+                                {'type':'image','name':'img','width':120,'height':150,'@click':'onMovieImageClick'},
+                                {'type':'label','name':'title','hAlign':'center'},
+                            ],
+                            'dir':'vertical'
+                      }
+                controls = {'type':'grid','name':'list','itemlayout':grid_layout,'value':self.search_movies,'marginSize':5,'itemheight':180,'itemwidth':120}
                 if not self.player.isModalExist('search'):
-                    self.doModal('search', 800, 600, self.search_word, controls)
+                    self.doModal('search',800,600,self.search_word,controls)
                 else:
-                    self.player.updateControlValue('search', 'list', self.search_movies)
+                    self.player.updateControlValue('search','list',self.search_movies)
             else:
-                self.player.toast('main', f'没有找到 {self.search_word} 相关的资源')
+                self.player.toast('main',f'没有找到 {self.search_word} 相关的资源')
+    
 
-    def onCategoryClick(self, pageId, control, *args):
+    def onCategoryClick(self,pageId,control,*args):
         for cat in self.categories:
             if cat['title'] == control:
                 if cat['url'] != self.curCategory:
                     self.curCategory, self.curCategoryName = cat['url'], cat['title']
                     self.pageIndex = 0
-                    # 获取新分类的页面数
+                    #获取新分类的页面数
                     self.loading()
                     self.pages = self.parse_66ys_page_num(self.curCategory)
                     self.num_page = num_page = '共' + str(len(self.pages)) + '页'
-                    self.player.updateControlValue('main', 'num_page', num_page)
+                    self.player.updateControlValue('main','num_page',num_page)
                     self.selectPage()
                     self.loading(True)
                 break
-
+        
     def onMovieImageClick(self, pageId, control, item, *args):
         movie_name = ''
         if pageId == 'main':
@@ -311,36 +303,34 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
             playUrl = parse_66ys_movie_magnet(self.search_movies[item]['url'])
             movie_name = self.search_movies[item]['title']
         if len(playUrl) > 0:
-            list_layout = [{'type': 'label', 'name': 'title', 'fontSize': 12},
-                           {'type': 'link', 'name': '播放', 'width': 30, '@click': 'onPlayClick'}]
-            if hasattr(self.player, 'download'):
-                list_layout.append({'type': 'space', 'width': 10})
-                list_layout.append({'type': 'link', 'name': '下载', 'width': 30, '@click': 'onDownloadClick'})
-            layout = {'type': 'list', 'name': 'list', 'itemlayout': {'group': list_layout}, 'value': playUrl,
-                      'separator': True, 'itemheight': 30}
+            list_layout = [{'type':'label','name':'title','fontSize':12}, {'type':'link','name':'播放','width':30,'@click':'onPlayClick'}]
+            if hasattr(self.player,'download'):
+                list_layout.append({'type':'space','width':10})
+                list_layout.append({'type':'link','name':'下载','width':30,'@click':'onDownloadClick'})
+            layout = {'type':'list','name':'list','itemlayout':{'group':list_layout},'value':playUrl,'separator':True,'itemheight':30}
             self.movie_urls[movie_name] = playUrl
             self.doModal(movie_name, 400, 500, movie_name, layout)
             self.movie_urls.pop(movie_name)
         else:
-            self.player.toast('main', '无可播放源')
+            self.player.toast('main','无可播放源')
 
     def onPlayClick(self, pageId, control, item, *args):
         if pageId in self.movie_urls:
             self.player.play(self.movie_urls[pageId][item]['url'])
-
+    
     def onDownloadClick(self, pageId, control, item, *args):
         if pageId in self.movie_urls:
             self.player.download(self.movie_urls[pageId][item]['url'])
 
     def selectPage(self):
         if len(self.pages) > self.pageIndex:
-            self.movies.clear()
-            self.player.updateControlValue('main', 'list', self.movies)
-            url = concatUrl(self.curCategory, self.pages[self.pageIndex])
-            self.movies = self.parse_66ys_page_movies(url)
-            self.player.updateControlValue('main', 'list', self.movies)
-            self.cur_page = page = '第' + str(self.pageIndex + 1) + '页'
-            self.player.updateControlValue('main', 'cur_page', page)
+                self.movies.clear()
+                self.player.updateControlValue('main','list',self.movies)
+                url = concatUrl(self.curCategory, self.pages[self.pageIndex])
+                self.movies = self.parse_66ys_page_movies(url)
+                self.player.updateControlValue('main','list',self.movies)
+                self.cur_page = page = '第' + str(self.pageIndex + 1) + '页'
+                self.player.updateControlValue('main','cur_page',page)
 
     def onClickFormerPage(self, *args):
         if self.pageIndex > 0:
@@ -371,19 +361,17 @@ class m66ysplugin(StellarPlayer.IStellarPlayerPlugin):
             self.selectPage()
             self.loading(True)
 
-    def loading(self, stopLoading=False):
-        if hasattr(self.player, 'loadingAnimation'):
+    def loading(self, stopLoading = False):
+        if hasattr(self.player,'loadingAnimation'):
             self.player.loadingAnimation('main', stop=stopLoading)
 
-    def loadingPage(self, page, stopLoading=False):
-        if hasattr(self.player, 'loadingAnimation'):
+    def loadingPage(self, page, stopLoading = False):
+        if hasattr(self.player,'loadingAnimation'):
             self.player.loadingAnimation(page, stop=stopLoading)
-
-
-def newPlugin(player: StellarPlayer.IStellarPlayer, *arg):
+    
+def newPlugin(player:StellarPlayer.IStellarPlayer,*arg):
     plugin = m66ysplugin(player)
     return plugin
 
-
-def destroyPlugin(plugin: StellarPlayer.IStellarPlayerPlugin):
+def destroyPlugin(plugin:StellarPlayer.IStellarPlayerPlugin):
     plugin.stop()
