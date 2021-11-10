@@ -29,20 +29,23 @@ class IwebdecodePlugin(StellarPlayer.IStellarPlayerPlugin):
         if hasattr(self.player, 'loadingAnimation'):
             self.player.loadingAnimation('main')
         # ----------------------------------------------
-        #url = self.player.getControlValue('main', 'url_edit')
-        urls = []
-        for i in range(3):
-            urls.append({'url': 'srcdata', 'video_profile': 'xxx'})
-        self.player.updateControlValue('main', 'list', urls)
-        self.playurl = urls
-        self.player.toast('main', '解析完成')
+        #获取到输入框的地址
+        search_url = self.player.getControlValue('main', 'url_edit')
+        #接口就写在这里
+        #         urls = []
+        #         for i in range(3):
+        #             urls.append({'url': '视频地址', 'video_profile': '视频名称'})
+        #         self.player.updateControlValue('main', 'list', urls)
+        #         self.playurl = urls
+        #         self.player.toast('main', '解析完成')
         #----------------------------------------------
         if hasattr(self.player, 'loadingAnimation'):
             self.player.loadingAnimation('main', stop=True)
 
     def onPlayClick(self, page, control, idx, *arg):
         if self.playurl:
-            self.player.play(self.playurl[idx]['url'])
+            #self.player.play(self.playurl[idx]['url'])
+            self.player.play(search_url)
 
 def newPlugin(player: StellarPlayer.IStellarPlayer, *arg):
     plugin = IwebdecodePlugin(player)
