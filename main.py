@@ -15,7 +15,16 @@ class Plugin(StellarPlayer.IStellarPlayerPlugin):
     def newPlugin(player:StellarPlayer.IStellarPlayer,*arg): 
         print("插件初始化") 
         return Plugin(player) 
-    
+    def makeLayout(self):
+        controls = [ 
+            [         
+                {'type':'edit',    'name':'url','label':'html页面地址'},
+                {'type':'button','name':'解析','@click':'search'}
+            ] # 行为列表，包含两个控件对象，两个控件宽度各占行的一半空间
+         ]
+        return controls
+    def search(self):
+        return 
 def newPlugin(player:StellarPlayer.IStellarPlayer,*arg):
     plugin = Plugin(player)
     return plugin
